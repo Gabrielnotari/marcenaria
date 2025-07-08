@@ -1,11 +1,7 @@
 package br.com.marcenaria.api_marcenaria.controller;
 
-import br.com.marcenaria.api_marcenaria.orcamento.DadosCadastroOrcamento;
-import br.com.marcenaria.api_marcenaria.orcamento.DadosListagemOrcamento;
-import br.com.marcenaria.api_marcenaria.usuario.DadosCadastroUsuario;
-import br.com.marcenaria.api_marcenaria.usuario.DadosListagemUsuario;
-import br.com.marcenaria.api_marcenaria.usuario.Usuario;
-import br.com.marcenaria.api_marcenaria.usuario.UsuarioService;
+import br.com.marcenaria.api_marcenaria.perfil.DadosPerfil;
+import br.com.marcenaria.api_marcenaria.usuario.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,8 +26,32 @@ public class UsuarioController {
     }
 
     @GetMapping("/verificar-conta")
-    public ResponseEntity<String> verificarEmail(@RequestParam String codigo){
+    public ResponseEntity<String> verificarEmail(@RequestParam String codigo) {
         usuarioService.verificarEmail(codigo);
         return ResponseEntity.ok("conta verificada com sucesso!");
+    }
+
+    @PutMapping("/editar-perfil")
+    public ResponseEntity<DadosListagemUsuario> editarPerfil(@RequestBody @Valid DadosEdicaoUsuario dados, @AuthenticationPrincipal Usuario logado) {
+        var usuario = usuarioService.editarPerfil(logado, dados);
+        return ResponseEntity.ok(new DadosListagemUsuario(usuario));
+    }
+
+    @PatchMapping("alterar-senha")
+    public ResponseEntity<Void> alterarSenha(@RequestBody @Valid DadosAlteracaoSenha dados, @AuthenticationPrincipal Usuario logado) {
+        usuarioService.alterarSenha(dados, logado);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/desativar")
+    public ResponseEntity<Void> banirUsuario(@AuthenticationPrincipal Usuario logado) {
+        usuarioService.desativarUsuario(logado);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("adicionar-perfil/{id}")
+    public ResponseEntity<DadosListagemUsuario> adicionarPerfil(@PathVariable Long id, @RequestBody @Valid DadosPerfil dados) {
+        var usuario = usuarioService.adicionarPerfil(id, dados);
+        return ResponseEntity.ok(new DadosListagemUsuario(usuario));
     }
 }

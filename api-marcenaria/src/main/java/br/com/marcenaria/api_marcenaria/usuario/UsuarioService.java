@@ -1,6 +1,10 @@
 package br.com.marcenaria.api_marcenaria.usuario;
 
 import br.com.marcenaria.api_marcenaria.infra.email.EmailService;
+import br.com.marcenaria.api_marcenaria.infra.exception.RegraDeNegocioException;
+import br.com.marcenaria.api_marcenaria.perfil.DadosPerfil;
+import br.com.marcenaria.api_marcenaria.perfil.PerfilNome;
+import br.com.marcenaria.api_marcenaria.perfil.PerfilRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,10 +21,13 @@ public class UsuarioService implements UserDetailsService {
 
     private final EmailService emailService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    private final PerfilRepository perfilRepository;
+
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, EmailService emailService, PerfilRepository perfilRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.perfilRepository = perfilRepository;
     }
 
     @Override
@@ -32,7 +39,9 @@ public class UsuarioService implements UserDetailsService {
     @Transactional
     public Usuario cadastrar(DadosCadastroUsuario dados) {
         var senhaCriptografada = passwordEncoder.encode(dados.senha());
-        var usuario = new Usuario(dados, senhaCriptografada);
+
+        var perfil = perfilRepository.findByNome(PerfilNome.CLIENTE);
+        var usuario = new Usuario(dados, senhaCriptografada, perfil);
 
         emailService.enviarEmailVerificacao(usuario);
         return usuarioRepository.save(usuario);
@@ -42,5 +51,42 @@ public class UsuarioService implements UserDetailsService {
     public void verificarEmail(String codigo) {
         var usuario = usuarioRepository.findByToken(codigo).orElseThrow();
         usuario.verificar();
+    }
+
+    public Usuario buscarPeloNomeUsuario(String nomeUsuario) {
+        return usuarioRepository.findByNomeUsuarioIgnoreCaseAndVerificadoTrueAndAtivoTrue(nomeUsuario).orElseThrow(
+                () -> new RegraDeNegocioException("Usuário não encontrado!"));
+    }
+
+    @Transactional
+    public Usuario editarPerfil(Usuario usuario, DadosEdicaoUsuario dados) {
+        return usuario.alterarDados(dados);
+    }
+
+    @Transactional
+    public void alterarSenha(DadosAlteracaoSenha dados, Usuario logado) {
+        if(!passwordEncoder.matches(dados.senhaAtual(), logado.getPassword())){
+            throw new RegraDeNegocioException("Senha digitada não confere com senha atual!");
+        }
+
+        if(!dados.novaSenha().equals(dados.novaSenhaConfirmacao())){
+            throw new RegraDeNegocioException("Senha e confirmação não conferem!");
+        }
+
+        String senhaCriptografada = passwordEncoder.encode(dados.novaSenha());
+        logado.alterarSenha(senhaCriptografada);
+    }
+
+    @Transactional
+    public void desativarUsuario(Usuario usuario) {
+        usuario.desativar();
+    }
+
+    @Transactional
+    public Usuario adicionarPerfil(Long id, DadosPerfil dados) {
+        var usuario = usuarioRepository.findById(id).orElseThrow();
+        var perfil = perfilRepository.findByNome(dados.perfilNome());
+        usuario.adicionarPerfil(perfil);
+        return usuario;
     }
 }
