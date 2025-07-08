@@ -2,7 +2,6 @@ package br.com.marcenaria.api_marcenaria.usuario;
 
 import br.com.marcenaria.api_marcenaria.infra.exception.RegraDeNegocioException;
 import br.com.marcenaria.api_marcenaria.perfil.Perfil;
-import br.com.marcenaria.api_marcenaria.perfil.PerfilNome;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
