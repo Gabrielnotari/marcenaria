@@ -20,6 +20,8 @@ public class Orcamento {
     private String endereco;
     private String descricao;
     private LocalDateTime dataCriacao;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     public Orcamento(){
 
@@ -30,6 +32,7 @@ public class Orcamento {
         this.endereco = dados.endereco();
         this.dataCriacao = LocalDateTime.now();
         this.autor = autor;
+        this.status = Status.NAO_APROVADO;
     }
 
     public Long getId() {
@@ -50,5 +53,23 @@ public class Orcamento {
 
     public LocalDateTime getDataCriacao() {
         return dataCriacao;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public Orcamento atualizarInformacoes(DadosAtualizacaoOrcamento dados, Orcamento orcamento) {
+        if(dados.descricao() != null){
+            this.descricao = dados.descricao();
+        }
+        if(dados.endereco() != null){
+            this.endereco = dados.endereco();
+        }
+        return this;
+    }
+
+    public void alterarStatus(Status status) {
+        this.status = status;
     }
 }
