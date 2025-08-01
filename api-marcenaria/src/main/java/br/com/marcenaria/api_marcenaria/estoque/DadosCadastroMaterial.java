@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 public record DadosCadastroMaterial(
         @NotBlank String nome,
         @NotBlank String dimensao,
-        @NotBlank String quantidade,
+        @NotBlank Integer quantidade,
         @NotBlank String fornecedor
 ) {
 }

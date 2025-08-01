@@ -2,10 +2,12 @@ package br.com.marcenaria.api_marcenaria.usuario;
 
 import br.com.marcenaria.api_marcenaria.infra.email.EmailService;
 import br.com.marcenaria.api_marcenaria.infra.exception.RegraDeNegocioException;
+import br.com.marcenaria.api_marcenaria.infra.seguranca.HierarquiaService;
 import br.com.marcenaria.api_marcenaria.perfil.DadosPerfil;
 import br.com.marcenaria.api_marcenaria.perfil.PerfilNome;
 import br.com.marcenaria.api_marcenaria.perfil.PerfilRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,11 +25,14 @@ public class UsuarioService implements UserDetailsService {
 
     private final PerfilRepository perfilRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, EmailService emailService, PerfilRepository perfilRepository) {
+    private final HierarquiaService hierarquiaService;
+
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, EmailService emailService, PerfilRepository perfilRepository, HierarquiaService hierarquiaService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.perfilRepository = perfilRepository;
+        this.hierarquiaService = hierarquiaService;
     }
 
     @Override
@@ -79,6 +84,16 @@ public class UsuarioService implements UserDetailsService {
 
     @Transactional
     public void desativarUsuario(Usuario usuario) {
+        usuario.desativar();
+    }
+
+    @Transactional
+    public void desativarUsuario(Long id, Usuario logado){
+        var usuario = usuarioRepository.findById(id).orElseThrow();
+
+        if(hierarquiaService.usuarioNaoTemPermissoes(logado, usuario, "ROLE_ADMIN"))
+            throw new AccessDeniedException("Não é possivel realizar essa operação!");
+
         usuario.desativar();
     }
 

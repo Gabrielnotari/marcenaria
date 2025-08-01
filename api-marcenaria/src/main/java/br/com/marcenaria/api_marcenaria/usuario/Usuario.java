@@ -102,6 +102,10 @@ public class Usuario implements UserDetails {
         this.ativo = false;
     }
 
+    public void reativar() {
+        this.ativo = true;
+    }
+
     public Usuario alterarDados(DadosEdicaoUsuario dados) {
         if(dados.nomeUsuario() != null){
             this.nomeUsuario = dados.nomeUsuario();

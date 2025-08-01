@@ -1,10 +1,8 @@
 package br.com.marcenaria.api_marcenaria.orcamento;
 
-import br.com.marcenaria.api_marcenaria.usuario.Endereco;
+
 import br.com.marcenaria.api_marcenaria.usuario.Usuario;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -71,5 +69,10 @@ public class Orcamento {
 
     public void alterarStatus(Status status) {
         this.status = status;
+    }
+
+    public Orcamento marcarComoAprovado() {
+        this.status = Status.APROVADO;
+        return this;
     }
 }

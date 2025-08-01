@@ -34,6 +34,12 @@ public class OrcamentoController {
         return ResponseEntity.ok(new DadosListagemOrcamento(orcamento));
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<DadosListagemOrcamento> marcarComoAprovado(@PathVariable Long id, @AuthenticationPrincipal Usuario logado){
+        var orcamento = service.marcarComoAprovado(id, logado);
+        return ResponseEntity.ok(new DadosListagemOrcamento(orcamento));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id){
         service.excluir(id);

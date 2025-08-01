@@ -10,6 +10,8 @@ public record DadosListagemOrcamento(
         LocalDateTime dataCriacao
 ) {
     public DadosListagemOrcamento(Orcamento orcamento){
-        this(orcamento.getId(), orcamento.getDescricao(), orcamento.getAutor().getNomeCompleto(), orcamento.getEndereco(), orcamento.getDataCriacao());
+        this(orcamento.getId(), orcamento.getDescricao(),
+                orcamento.getAutor().getNomeCompleto(),
+                orcamento.getEndereco(), orcamento.getDataCriacao());
     }
 }
